@@ -15,10 +15,7 @@ import (
 const dbFile = "blockchain.db"
 const blocksBucket = "blocks"
 
-// const miner = "firefly"
-const genesisCoinbaseData = ""
-
-//const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
+const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
 
 type BlockchainIterator struct {
 	currentHash []byte   // 当前区块hash
@@ -30,7 +27,7 @@ type Blockchain struct {
 	db  *bolt.DB
 }
 
-func (bc *Blockchain) MinedBlock(txs []*Transaction, data string) {
+func (bc *Blockchain) MinedBlock(txs []*Transaction, miner, data string) {
 	var tip []byte
 	// 得到最新的哈希值
 	bc.db.View(func(tx *bolt.Tx) error {
@@ -42,6 +39,8 @@ func (bc *Blockchain) MinedBlock(txs []*Transaction, data string) {
 	bc.db.Update(func(tx *bolt.Tx) error {
 		buck := tx.Bucket([]byte(blocksBucket))
 
+		coinbasetx := NewCoinbaseTX(miner, data)
+		txs = append(txs, coinbasetx)
 		block := NewBlock(txs, tip)
 
 		buck.Put(block.Hash, block.Serialize())
@@ -126,12 +125,11 @@ func (bc *Blockchain) FindUnspentTransactions(pubKeyHash []byte) []Transaction {
 					UTXO = append(UTXO, *tx)
 				}
 			}
-			if !tx.IsCoinbase() {
-				for _, in := range tx.Vin {
-					if in.UsesKey(pubKeyHash) {
-						inTxID := hex.EncodeToString(in.Txid)
-						spentTXOs[inTxID] = append(spentTXOs[inTxID], in.VoutIdx)
-					}
+			// 处理所有类型的交易，包括硬币基础交易
+			for _, in := range tx.Vin {
+				if in.UsesKey(pubKeyHash) {
+					inTxID := hex.EncodeToString(in.Txid)
+					spentTXOs[inTxID] = append(spentTXOs[inTxID], in.VoutIdx)
 				}
 			}
 		}
@@ -189,10 +187,10 @@ func (bc *Blockchain) getBalance(address string) {
 
 	fmt.Printf("Balance of '%s': %d\n", address, balance)
 }
-
 func (bc *Blockchain) Send(from, to string, amount int, data string, wallet *Wallet) {
+	fmt.Println("send address from ...", from)
 	tx := NewUTXOTransaction(from, to, amount, bc, wallet)
-	bc.MinedBlock([]*Transaction{tx}, data)
+	bc.MinedBlock([]*Transaction{tx}, from, data)
 	fmt.Println("send success")
 }
 

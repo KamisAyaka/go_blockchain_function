@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 )
 
 type TXInput struct {
@@ -16,6 +15,6 @@ type TXInput struct {
 func (in *TXInput) UsesKey(pubKeyHash []byte) bool {
 
 	lockingHash := HashPubKey(in.PubKey)
-	fmt.Printf("UsesKey:%x,\n%x\n", pubKeyHash, lockingHash)
+	//fmt.Printf("UsesKey:%x,\n%x\n", pubKeyHash, lockingHash)
 	return bytes.Equal(lockingHash, pubKeyHash)
 }

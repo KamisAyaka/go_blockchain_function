@@ -14,13 +14,6 @@ type Block struct {
 	Nonce        int64
 }
 
-// func (b *Block) SetHash() {
-// 	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
-// 	headers := bytes.Join([][]byte{b.PrevHash, b.Data, timestamp}, []byte{})
-// 	hash := sha256.Sum256(headers)
-// 	b.Hash = hash[:]
-// }
-
 // Block序列化
 func (b *Block) Serialize() []byte {
 	var result bytes.Buffer
