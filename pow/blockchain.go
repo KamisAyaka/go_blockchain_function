@@ -179,7 +179,9 @@ Work:
 
 func (bc *Blockchain) getBalance(address string) {
 	balance := 0
-	UTXOs := bc.FindUTXO([]byte(address))
+	pubKeyHash := Base58Decode([]byte(address))
+	pubKeyHash = pubKeyHash[1 : len(pubKeyHash)-4]
+	UTXOs := bc.FindUTXO(pubKeyHash)
 
 	for _, out := range UTXOs {
 		balance += out.Value

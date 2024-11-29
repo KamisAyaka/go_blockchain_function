@@ -31,18 +31,6 @@ func (tx *Transaction) SetID() {
 	tx.ID = hash[:]
 }
 
-func (b *Block) HashTransactions() []byte {
-	var txHashes [][]byte
-	var txHash [32]byte
-
-	for _, tx := range b.Transactions {
-		txHashes = append(txHashes, tx.ID)
-	}
-	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
-
-	return txHash[:]
-}
-
 func (tx Transaction) IsCoinbase() bool {
 	return len(tx.Vin) == 1 && len(tx.Vin[0].Txid) == 0 && tx.Vin[0].VoutIdx == -1
 }
